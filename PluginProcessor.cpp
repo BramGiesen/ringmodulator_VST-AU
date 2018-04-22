@@ -1,32 +1,16 @@
 /*
  ==============================================================================
  
- This file is part of the JUCE library.
- Copyright (c) 2017 - ROLI Ltd.
+ This file was auto-generated!
  
- JUCE is an open source library subject to commercial or open-source
- licensing.
- 
- By using JUCE, you agree to the terms of both the JUCE 5 End-User License
- Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
- 27th April 2017).
- 
- End User License Agreement: www.juce.com/juce-5-licence
- Privacy Policy: www.juce.com/juce-5-privacy-policy
- 
- Or: You may also use this code under the terms of the GPL v3 (see
- www.gnu.org/licenses).
- 
- JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
- EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
- DISCLAIMED.
+ It contains the basic framework code for a JUCE plugin editor.
  
  ==============================================================================
  */
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-//#include "SinewaveSynth.h"
+
 
 AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
@@ -37,9 +21,6 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
 {
     lastPosInfo.resetToDefault();
     
-    // This creates our parameters. We'll keep some raw pointers to them in this class,
-    // so that we can easily access them later, but the base class will take care of
-    // deleting them for us.
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry/Wet", "Dry/Wet", 0.0f, 1.0f, 0.5f));
     addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO-Frequency",  "LFO-Frequency", 0.0f, 4.0f,0.9f));
@@ -114,9 +95,7 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     
-    // In case we have more outputs than inputs, we'll clear any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
+
     for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
         buffer.clear (i, 0, numSamples);
     
@@ -125,18 +104,15 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
+  
     for(int sample = 0; sample < buffer.getNumSamples(); ++sample){
         
         for (int channel = 0; channel< totalNumInputChannels; ++channel)
         {
             auto channelData = buffer.getWritePointer (channel);
             float  signal = buffer.getSample(channel, sample);
-//            const float amplitude = *amplitudeParam;
-            
 
-            LFO = oscillators[1]->getSample()* *LFOdepthParam;;
+            LFO = oscillators[1]->getSample()* *LFOdepthParam;
             sineWave = oscillators[0]->getSample();
             oscillators[0]->tick();
             oscillators[1]->tick();
@@ -144,12 +120,12 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
             if(*frequencyParam <= 0)sineWave = 1;
             channelData[sample] = (amplitudeWet * signal * sineWave) + (amplitudeDry * signal);
         }
-        std::cout << amplitudeWet << "  " << amplitudeDry << std::endl;
     setFrequency();
+        
     setWaveForm();
+        
     applyAmplitude();
     
-    // Now ask the host for the current time so we can store it to be displayed later...
     updateCurrentTimeInfoFromHost();
 }
 }
@@ -163,12 +139,11 @@ void RingModulatorAudioProcessor::updateCurrentTimeInfoFromHost()
         
         if (ph->getCurrentPosition (newTime))
         {
-            lastPosInfo = newTime;  // Successfully got the current time from the host..
+            lastPosInfo = newTime;
             return;
         }
     }
     
-    // If the host fails to provide the current time, we'll just reset our copy to a default..
     lastPosInfo.resetToDefault();
 }
 

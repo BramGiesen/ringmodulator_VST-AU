@@ -1,25 +1,9 @@
 /*
  ==============================================================================
  
- This file is part of the JUCE library.
- Copyright (c) 2017 - ROLI Ltd.
+ This file was auto-generated!
  
- JUCE is an open source library subject to commercial or open-source
- licensing.
- 
- By using JUCE, you agree to the terms of both the JUCE 5 End-User License
- Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
- 27th April 2017).
- 
- End User License Agreement: www.juce.com/juce-5-licence
- Privacy Policy: www.juce.com/juce-5-privacy-policy
- 
- Or: You may also use this code under the terms of the GPL v3 (see
- www.gnu.org/licenses).
- 
- JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
- EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
- DISCLAIMED.
+ It contains the basic framework code for a JUCE plugin editor.
  
  ==============================================================================
  */
@@ -32,9 +16,7 @@
 #include "randomGen.h"
 
 //==============================================================================
-/**
- As the name suggest, this class does the actual audio processing.
- */
+
 class RingModulatorAudioProcessor  : public AudioProcessor
 {
 public:
@@ -94,21 +76,10 @@ public:
     
     
     //==============================================================================
-    // These properties are public so that our editor component can access them
-    // A bit of a hacky way to do it, but it's only a demo! Obviously in your own
-    // code you'll do this much more neatly..
-    
-    // this is kept up to date with the midi messages that arrive, and the UI component
-    // registers with it so it can represent the incoming messages
-//    MidiKeyboardState keyboardState;
-    
-    // this keeps a copy of the last set of time info that was acquired during an audio
-    // callback - the UI component will read this and display it.
+ 
     AudioPlayHead::CurrentPositionInfo lastPosInfo;
     
-    // these are used to persist the UI's size - the values are stored along with the
-    // filter's other parameters, and the UI component will update them when it gets
-    // resized.
+
     int lastUIWidth = 400, lastUIHeight = 200;
     
     // Our parameters
