@@ -20,7 +20,7 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
 : AudioProcessor (getBusesProperties())
 {
     lastPosInfo.resetToDefault();
-    
+    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO-glide", 0.01f, 10.f, 0.01f));
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry/Wet", "Dry/Wet", 0.0f, 1.0f, 0.5f));
     addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO-Frequency",  "LFO-Frequency", 0.0f, 4.0f,0.9f));
@@ -112,7 +112,7 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
             auto channelData = buffer.getWritePointer (channel);
             float  signal = buffer.getSample(channel, sample);
 
-            LFO = oscillators[1]->getSample()* *LFOdepthParam;
+            LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam);
             sineWave = oscillators[0]->getSample();
             oscillators[0]->tick();
             oscillators[1]->tick();
@@ -155,6 +155,8 @@ AudioProcessorEditor* RingModulatorAudioProcessor::createEditor()
 
 void RingModulatorAudioProcessor::setFrequency()
 {
+//    lowpassParam = lowPass->process(*LFOfrequencyParam);
+    lowPass->setFc(*inputVolumeParam/44100);
     oscillators[0]->setFrequency(*frequencyParam + LFO);
     oscillators[1]->setFrequency(*LFOfrequencyParam);
 }

@@ -55,6 +55,7 @@ RingModulatorAudioProcessorEditor::RingModulatorAudioProcessorEditor (RingModula
 : AudioProcessorEditor (owner), processor (owner),
 //midiKeyboard (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
 timecodeDisplayLabel (String()),
+inputVolumeLabel(String(), "LFO glide :"),
 frequencyLabel (String(), "Frequency :"),
 amplitudeLabel (String(), "Dry/Wet :"),
 LFOfrequencyLabel (String(), "LFO Frequency :"),
@@ -62,6 +63,9 @@ LFOdepthLabel (String(), "LFO depth :"),
 stereoLabel (String(), "LFO Waveform :")
 {
     // add some sliders..
+    addAndMakeVisible (inputVolumeSlider = new ParameterSlider (*owner.inputVolumeParam));
+    inputVolumeSlider-> setRange (0.0, 1.0, 0.0);
+    
     addAndMakeVisible (frequencySlider = new ParameterSlider (*owner.frequencyParam));
     frequencySlider->setSliderStyle (Slider::Rotary);
     frequencySlider-> setRange (0.0, 1.0, 0.0);
@@ -78,6 +82,7 @@ stereoLabel (String(), "LFO Waveform :")
     delaySlider->setSliderStyle (Slider::Rotary);
     delaySlider-> setRange (0.0, 1.0, 0.0);
     
+    
     addAndMakeVisible (stereoBox);
     
     auto i = 1;
@@ -87,6 +92,10 @@ stereoLabel (String(), "LFO Waveform :")
     stereoBox.addListener (this);
     stereoBox.setSelectedId (processor.stereoParam->getIndex() + 1);
    
+    addAndMakeVisible (inputVolumeLabel);
+    inputVolumeLabel.setJustificationType (Justification::centredLeft);
+    inputVolumeLabel.attachToComponent (inputVolumeSlider, true);
+    
     addAndMakeVisible (stereoLabel);
     stereoLabel.setJustificationType (Justification::centredLeft);
     stereoLabel.attachToComponent (&stereoBox, true);
@@ -139,6 +148,8 @@ void RingModulatorAudioProcessorEditor::resized()
     Rectangle<int> r (getLocalBounds().reduced (8));
     
     timecodeDisplayLabel.setBounds (r.removeFromTop (26));
+    
+    inputVolumeSlider->setBounds (r.removeFromTop (30));
     
     r.removeFromTop (20);
     Rectangle<int> sliderArea (r.removeFromTop (60));

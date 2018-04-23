@@ -38,8 +38,8 @@ private:
     
     RingModulatorAudioProcessor& processor;
     
-    Label timecodeDisplayLabel, frequencyLabel, amplitudeLabel, LFOfrequencyLabel, LFOdepthLabel, stereoLabel;
-    ScopedPointer<ParameterSlider> frequencySlider, delaySlider, LFOfrequencySlider, LFOdepthSlider;
+    Label timecodeDisplayLabel, inputVolumeLabel, frequencyLabel, amplitudeLabel, LFOfrequencyLabel, LFOdepthLabel, stereoLabel;
+    ScopedPointer<ParameterSlider> inputVolumeSlider, frequencySlider, delaySlider, LFOfrequencySlider, LFOdepthSlider;
     ComboBox stereoBox;
     Colour backgroundColour;
     

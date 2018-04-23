@@ -14,6 +14,7 @@
 #include "sineWave.h"
 #include "sawWave.h"
 #include "randomGen.h"
+#include "onepole.h"
 
 //==============================================================================
 
@@ -83,6 +84,7 @@ public:
     int lastUIWidth = 400, lastUIHeight = 200;
     
     // Our parameters
+    AudioParameterFloat* inputVolumeParam;
     AudioParameterFloat* frequencyParam = nullptr;
     AudioParameterFloat* amplitudeParam = nullptr;
     AudioParameterFloat* LFOfrequencyParam = nullptr;
@@ -109,8 +111,11 @@ private:
     int delayPosition = 0;
     int previousI = 1;
 
+    OnePole *lowPass = new OnePole(1.0 / 44100);
     // #TODO: make sampleRate variable
     Oscillator **oscillators;
+    
+    float lowpassParam = 0;
     
     void updateCurrentTimeInfoFromHost();
     static BusesProperties getBusesProperties();
