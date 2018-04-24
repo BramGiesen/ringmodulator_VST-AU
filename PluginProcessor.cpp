@@ -20,7 +20,7 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
 : AudioProcessor (getBusesProperties())
 {
     lastPosInfo.resetToDefault();
-    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO-glide", 0.01f, 10.f, 0.01f));
+    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO-glide", 0.1f, 10.f, 0.1f));
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry/Wet", "Dry/Wet", 0.0f, 1.0f, 0.5f));
     addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO-Frequency",  "LFO-Frequency", 0.0f, 4.0f,0.9f));
@@ -111,8 +111,8 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
         {
             auto channelData = buffer.getWritePointer (channel);
             float  signal = buffer.getSample(channel, sample);
-
-            LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam);
+            
+//            LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam);
             sineWave = oscillators[0]->getSample();
             oscillators[0]->tick();
             oscillators[1]->tick();
@@ -155,8 +155,11 @@ AudioProcessorEditor* RingModulatorAudioProcessor::createEditor()
 
 void RingModulatorAudioProcessor::setFrequency()
 {
-//    lowpassParam = lowPass->process(*LFOfrequencyParam);
-    lowPass->setFc(*inputVolumeParam/44100);
+    glide = *inputVolumeParam * -1 + 10.1;
+    (glide < 10) ? LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam) : LFO = oscillators[1]->getSample()* *LFOdepthParam;
+    lowPass->setFc(glide/44100);
+//    std::cout << "glide = " << glide << std::endl;
+    
     oscillators[0]->setFrequency(*frequencyParam + LFO);
     oscillators[1]->setFrequency(*LFOfrequencyParam);
 }
@@ -198,9 +201,10 @@ void RingModulatorAudioProcessor::getStateInformation (MemoryBlock& destData)
     
     // Store the values of all our parameters, using their param ID as the XML attribute
     for (auto* param : getParameters())
-        if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param))
+        if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param)){
             xml.setAttribute (p->paramID, p->getValue());
-    
+            std::cout << param << std::endl;
+        }
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
 }

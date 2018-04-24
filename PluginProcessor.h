@@ -110,6 +110,7 @@ private:
     float amplitudeDry = 0;
     int delayPosition = 0;
     int previousI = 1;
+    float glide = 0;
 
     OnePole *lowPass = new OnePole(1.0 / 44100);
     // #TODO: make sampleRate variable
