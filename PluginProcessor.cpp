@@ -20,12 +20,12 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
 : AudioProcessor (getBusesProperties())
 {
     lastPosInfo.resetToDefault();
-    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO-glide", 0.1f, 10.f, 0.1f));
+    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO_glide", 0.1f, 10.f, 0.1f));
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
-    addParameter (amplitudeParam = new AudioParameterFloat ("Dry/Wet", "Dry/Wet", 0.0f, 1.0f, 0.5f));
-    addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO-Frequency",  "LFO-Frequency", 0.0f, 4.0f,0.9f));
-    addParameter (LFOdepthParam = new AudioParameterFloat ("LFO-depth", "LFO-depth", 0.0f, 100.0f, 0.5f));
-    addParameter (stereoParam   = new AudioParameterChoice ("Wave form", "LFO-wave form", { "saw wave", "noise generator" }, 1));
+    addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO_Frequency",  "LFO_Frequency", 0.0f, 4.0f,0.9f));
+    addParameter (LFOdepthParam = new AudioParameterFloat ("LFO_depth", "LFO_depth", 0.0f, 100.0f, 0.5f));
+    addParameter (stereoParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "saw wave", "noise generator" }, 1));
+    addParameter (amplitudeParam = new AudioParameterFloat ("Dry_Wet", "Dry_Wet", 0.0f, 1.0f, 0.5f));
 }
 
 RingModulatorAudioProcessor::~RingModulatorAudioProcessor()
@@ -166,7 +166,7 @@ void RingModulatorAudioProcessor::setFrequency()
 
 void RingModulatorAudioProcessor::setWaveForm()
 {
-    int i = stereoParam->getIndex() + 1;
+    int i = 1; //stereoParam->getIndex() + 1;
     if(i != previousI){
         switch (i) {
             case 1: { oscillators[1] = new SawWave(44100, 0, phase);
@@ -193,18 +193,19 @@ void RingModulatorAudioProcessor::getStateInformation (MemoryBlock& destData)
     // Here's an example of how you can use XML to make it easy and more robust:
     
     // Create an outer XML element..
-    XmlElement xml ("MYPLUGINSETTINGS");
+    XmlElement xml ("RMSETTINGS");
     
     // add some attributes to it..
     xml.setAttribute ("uiWidth", lastUIWidth);
     xml.setAttribute ("uiHeight", lastUIHeight);
     
     // Store the values of all our parameters, using their param ID as the XML attribute
-    for (auto* param : getParameters())
+    for (auto* param : getParameters()){
         if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param)){
             xml.setAttribute (p->paramID, p->getValue());
-            std::cout << param << std::endl;
+//            std::cout << p << std::endl;
         }
+    }
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
 }
@@ -220,7 +221,7 @@ void RingModulatorAudioProcessor::setStateInformation (const void* data, int siz
     if (xmlState != nullptr)
     {
         // make sure that it's actually our type of XML object..
-        if (xmlState->hasTagName ("MYPLUGINSETTINGS"))
+        if (xmlState->hasTagName ("RMSETTINGS"))
         {
             // ok, now pull out our last window size..
             lastUIWidth  = jmax (xmlState->getIntAttribute ("uiWidth", lastUIWidth), 400);

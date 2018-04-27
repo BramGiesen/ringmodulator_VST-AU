@@ -98,7 +98,7 @@ stereoLabel (String(), "LFO WAVEFORM :")
     delaySlider->setSliderStyle (Slider::Rotary);
     delaySlider-> setRange (0.0, 1.0, 0.0);
     delaySlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
-    
+
     
     addAndMakeVisible (inputVolumeLabel);
     inputVolumeLabel.setJustificationType (Justification::centredLeft);
@@ -185,7 +185,7 @@ void RingModulatorAudioProcessorEditor::paint (Graphics& g)
     std::string dw = to_string_with_precision(drywet,0);
     g.drawFittedText(dw, 583, 135, 70, 10, Justification::centred, 1);
     g.drawFittedText("%", 555, 175, 70, 10, Justification::right, 1);
-    
+//
     
     g.setFont(11.0f);
     g.setColour(Colours::white);
