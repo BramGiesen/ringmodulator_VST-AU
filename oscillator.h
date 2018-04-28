@@ -14,6 +14,7 @@ public:
     
     double getSample();
     void tick();
+    void setPhase(double phase);
     void setFrequency(double frequency);
     double getFrequency();
 protected:
@@ -37,6 +38,10 @@ inline void Oscillator::tick()
     calculate();
 }
 
+inline void Oscillator::setPhase(double phase)
+{
+    this->phase = phase;
+}
 
 inline void Oscillator::setFrequency(double frequency)
 {

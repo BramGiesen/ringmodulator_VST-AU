@@ -22,7 +22,7 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
     lastPosInfo.resetToDefault();
     addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO_glide", 0.1f, 10.f, 0.1f));
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
-    addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO_Frequency",  "LFO_Frequency", 0.0f, 4.0f,0.9f));
+    addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO_Frequency",  "LFO_Frequency", -10.0f, 10.0f,0.0f));
     addParameter (LFOdepthParam = new AudioParameterFloat ("LFO_depth", "LFO_depth", 0.0f, 100.0f, 0.5f));
     addParameter (stereoParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "saw wave", "noise generator" }, 1));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry_Wet", "Dry_Wet", 0.0f, 1.0f, 0.5f));
@@ -120,6 +120,9 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
             if(*frequencyParam <= 0)sineWave = 1;
             channelData[sample] = (amplitudeWet * signal * sineWave) + (amplitudeDry * signal);
         }
+    
+    setBPM(lastPosInfo);
+        
     setFrequency();
         
     setWaveForm();
@@ -158,15 +161,44 @@ void RingModulatorAudioProcessor::setFrequency()
     glide = *inputVolumeParam * -1 + 10.1;
     (glide < 10) ? LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam) : LFO = oscillators[1]->getSample()* *LFOdepthParam;
     lowPass->setFc(glide/44100);
-//    std::cout << "glide = " << glide << std::endl;
     
     oscillators[0]->setFrequency(*frequencyParam + LFO);
-    oscillators[1]->setFrequency(*LFOfrequencyParam);
+
+    
+        if(*LFOfrequencyParam < 0){
+            LFOP = *LFOfrequencyParam - 1;
+            LFOI = int(*LFOfrequencyParam);
+            LFOf = rateValues[(LFOI * -1)];
+            syncfreq = beats/LFOf;
+            oscillators[1]->setFrequency(syncfreq);
+            
+            if(LFOI != previousLFOfreq){
+                if(!setPhaseSwitch){
+                    setPhaseSwitch = true;
+                    setOSCphase(lastPosInfo);
+//                    x++;
+//                    std::cout << "phase switch = " << x << std::endl;
+                }
+                else{
+
+                    previousLFOfreq = LFOI;
+                    setPhaseSwitch = false;
+                }
+            }
+            else {
+                previousLFOfreq = LFOI;
+            }
+        }else{
+            if(*LFOfrequencyParam < 0 && *LFOfrequencyParam > -0.5){ oscillators[1]->setFrequency(0); }
+            else{
+                oscillators[1]->setFrequency(*LFOfrequencyParam);
+                }
+            }
 }
 
 void RingModulatorAudioProcessor::setWaveForm()
 {
-    int i = 1; //stereoParam->getIndex() + 1;
+    int i = stereoParam->getIndex() + 1;
     if(i != previousI){
         switch (i) {
             case 1: { oscillators[1] = new SawWave(44100, 0, phase);
@@ -185,6 +217,32 @@ void RingModulatorAudioProcessor::applyAmplitude()
     amplitudeWet = *amplitudeParam;
     amplitudeDry = (amplitudeWet * -1.0f) + 1.0f;
 }
+
+
+void RingModulatorAudioProcessor::setBPM(AudioPlayHead::CurrentPositionInfo bpm)
+{
+    beats = bpm.bpm;
+    
+    if (bpm.isPlaying){
+        if(!setPhase){
+            setPhase = true;
+            setOSCphase(bpm);
+            //            *LFOdepthParam = timer;
+        }
+    }
+    else if (!bpm.isPlaying && !bpm.isRecording){
+        setPhase = false;
+    }
+}
+
+void RingModulatorAudioProcessor::setOSCphase(AudioPlayHead::CurrentPositionInfo bpm)
+{
+    double beatss = bpm.bpm;
+    double phaseLenght = 60 / beatss;
+    double timer = fmod(bpm.timeInSeconds,phaseLenght)/phaseLenght;
+    oscillators[1]->setPhase(timer);
+}
+
 
 //==============================================================================
 void RingModulatorAudioProcessor::getStateInformation (MemoryBlock& destData)

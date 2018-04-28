@@ -172,9 +172,22 @@ void RingModulatorAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText("Hz", 91, 175, 70, 10, Justification::left, 1);
     
     float LFOfreq = processor.LFOfrequencyParam->get();
-    std::string LFOf = to_string_with_precision(LFOfreq,1);
-    g.drawFittedText(LFOf, 245, 135, 70, 10, Justification::centred, 1);
-    g.drawFittedText("Hz", 216, 175, 70, 10, Justification::right, 1);
+    
+    if(LFOfreq < 0){
+        LFOfreq -= 1;
+        int LFOI = int(LFOfreq);
+        std::string LFOf = rateValues[(LFOI * -1)-1];
+        g.drawFittedText(LFOf, 245, 135, 70, 10, Justification::centred, 1);
+        g.drawFittedText("Beat", 222, 175, 70, 10, Justification::right, 1);
+        
+    }else{
+        if(LFOfreq < 0 && LFOfreq > -0.5){LFOfreq = 0; }
+        else{
+        std::string LFOf = to_string_with_precision(LFOfreq,1);
+        g.drawFittedText(LFOf, 245, 135, 70, 10, Justification::centred, 1);
+        g.drawFittedText("Hz", 216, 175, 70, 10, Justification::right, 1);
+        }
+    }
     
     float LFOdep = processor.LFOdepthParam->get();
     std::string LFOd = to_string_with_precision(LFOdep,0);
@@ -186,6 +199,8 @@ void RingModulatorAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText(dw, 583, 135, 70, 10, Justification::centred, 1);
     g.drawFittedText("%", 555, 175, 70, 10, Justification::right, 1);
 //
+    std::string beatsString = to_string_with_precision(beats,0);
+//    g.drawFittedText(beatsString, 400, 135, 70, 10, Justification::centred, 1);
     
     g.setFont(11.0f);
     g.setColour(Colours::white);
@@ -229,6 +244,7 @@ void RingModulatorAudioProcessorEditor::resized()
 void RingModulatorAudioProcessorEditor::timerCallback()
 {
     updateTimecodeDisplay (getProcessor().lastPosInfo);
+    setBPM(getProcessor().lastPosInfo);
 }
 
 void RingModulatorAudioProcessorEditor::hostMIDIControllerIsAvailable (bool controllerIsAvailable)
@@ -292,7 +308,6 @@ static String quarterNotePositionToBarsBeatsString (double quarterNotes, int num
 void RingModulatorAudioProcessorEditor::updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
 {
     MemoryOutputStream displayText;
-
     displayText << "[" << SystemStats::getJUCEVersion() << "]   "
     << String (pos.bpm, 2) << " bpm, "
     << pos.timeSigNumerator << '/' << pos.timeSigDenominator
@@ -300,13 +315,18 @@ void RingModulatorAudioProcessorEditor::updateTimecodeDisplay (AudioPlayHead::Cu
     << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
                                                         pos.timeSigNumerator,
                                                         pos.timeSigDenominator);
-
+    
     if (pos.isRecording)
         displayText << "  (recording)";
     else if (pos.isPlaying)
         displayText << "  (playing)";
 
     timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
+}
+
+void RingModulatorAudioProcessorEditor::setBPM(AudioPlayHead::CurrentPositionInfo bpm)
+{
+    beats = bpm.bpm;
 }
 
 

@@ -111,6 +111,20 @@ private:
     int delayPosition = 0;
     int previousI = 1;
     float glide = 0;
+    float syncfreq;
+    int LFOI;
+    float LFOf;
+    float beats = 120;
+    float currentLFOfreq = 0;
+    float previousLFOfreq = 0;
+    int x = 0;
+    float LFOP = 0;
+    
+    bool setPhase = false;
+    bool setPhaseSwitch = false;
+    
+    
+    float rateValues[11]{15,20,30,40,60,80,120,160.0000000001,240,320.0000000002,480};
 
     OnePole *lowPass = new OnePole(1.0 / 44100);
     // #TODO: make sampleRate variable
@@ -118,6 +132,8 @@ private:
     
     float lowpassParam = 0;
     
+    void setBPM(AudioPlayHead::CurrentPositionInfo bpm);
+    void setOSCphase(AudioPlayHead::CurrentPositionInfo bpm);
     void updateCurrentTimeInfoFromHost();
     static BusesProperties getBusesProperties();
     

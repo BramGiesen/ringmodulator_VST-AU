@@ -34,7 +34,11 @@ public:
     
 private:
     void comboBoxChanged (ComboBox*) override;
+    void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo);
+    void setBPM(AudioPlayHead::CurrentPositionInfo);
     class ParameterSlider;
+    
+    double beats = 0;
     
     RingModulatorAudioProcessor& processor;
     
@@ -42,13 +46,13 @@ private:
     ScopedPointer<ParameterSlider> inputVolumeSlider, frequencySlider, delaySlider, LFOfrequencySlider, LFOdepthSlider;
     ComboBox stereoBox;
     Colour backgroundColour;
-    
+    std::string rateValues[11]{"32","32t","16","16t","8","8t","4","4t","2","2t","1"};
+    std::string LFOf;
     //==============================================================================
     RingModulatorAudioProcessor& getProcessor() const
     {
         return static_cast<RingModulatorAudioProcessor&> (processor);
     }
     
-    void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo);
 };
 
