@@ -23,7 +23,6 @@ public:
     ParameterSlider (AudioProcessorParameter& p)
     : Slider (p.getName (256)), param (p)
     {
-//        setRange (0.0, 1.0, 0.0);
         startTimerHz (30);
         updateSliderPos();
     }
@@ -54,7 +53,6 @@ public:
 //==============================================================================
 RingModulatorAudioProcessorEditor::RingModulatorAudioProcessorEditor (RingModulatorAudioProcessor& owner)
 : AudioProcessorEditor (owner), processor (owner),
-//midiKeyboard (owner.keyboardState, MidiKeyboardComponent::horizontalKeyboard),
 timecodeDisplayLabel (String()),
 inputVolumeLabel(String(), "LFO GLIDE :"),
 frequencyLabel (String(), "FREQUENCY :"),
@@ -88,7 +86,7 @@ stereoLabel (String(), "LFO WAVEFORM :")
     LFOfrequencySlider->setSliderStyle (Slider::Rotary);
     LFOfrequencySlider-> setRange (0.0, 1.0, 0.0);
     LFOfrequencySlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
-    
+   
     addAndMakeVisible (LFOdepthSlider = new ParameterSlider (*owner.LFOdepthParam));
     LFOdepthSlider->setSliderStyle (Slider::Rotary);
     LFOdepthSlider-> setRange (0.0, 1.0, 0.0);
@@ -155,7 +153,7 @@ std::string to_string_with_precision(const T a_value, const int n)
 //==============================================================================
 void RingModulatorAudioProcessorEditor::paint (Graphics& g)
 {
-//    g.setColour (backgroundColour);
+
     g.setColour(Colours::darkgrey);
     g.fillAll();
     
@@ -167,7 +165,7 @@ void RingModulatorAudioProcessorEditor::paint (Graphics& g)
     float freq = processor.frequencyParam->get();
 
     std::string f = to_string_with_precision(freq,1);
-//    g.drawFittedText(frek, getLocalBounds(), Justification::bottomLeft, 1);
+
     g.drawFittedText(f, 65, 135, 70, 10, Justification::centred, 1);
     g.drawFittedText("Hz", 91, 175, 70, 10, Justification::left, 1);
     
@@ -198,13 +196,13 @@ void RingModulatorAudioProcessorEditor::paint (Graphics& g)
     std::string dw = to_string_with_precision(drywet,0);
     g.drawFittedText(dw, 583, 135, 70, 10, Justification::centred, 1);
     g.drawFittedText("%", 555, 175, 70, 10, Justification::right, 1);
-//
+
     std::string beatsString = to_string_with_precision(beats,0);
-//    g.drawFittedText(beatsString, 400, 135, 70, 10, Justification::centred, 1);
+
     
     g.setFont(11.0f);
     g.setColour(Colours::white);
-//    g.drawText("Ring Modulator v1.0 - 2018", getLocalBounds(), Justification::bottomRight, 1);
+
 }
 
 void RingModulatorAudioProcessorEditor::resized()
@@ -215,11 +213,10 @@ void RingModulatorAudioProcessorEditor::resized()
     r.removeFromLeft(10);
     
     auto topSection = r.removeFromTop(30);
-//    timecodeDisplayLabel.setBounds (r.removeFromTop (26));
-//    stereoBox.setBounds(topSection.removeFromLeft (jmin (180, topSection.getWidth() / 2)));
+
     stereoBox.setBounds(100,15,200,20);
     inputVolumeSlider->setBounds(450, 0, 200, 50);
-//    inputVolumeSlider->setSize(200, 100);
+
     
   
     
@@ -243,13 +240,12 @@ void RingModulatorAudioProcessorEditor::resized()
 //==============================================================================
 void RingModulatorAudioProcessorEditor::timerCallback()
 {
-    updateTimecodeDisplay (getProcessor().lastPosInfo);
-    setBPM(getProcessor().lastPosInfo);
+    
 }
 
 void RingModulatorAudioProcessorEditor::hostMIDIControllerIsAvailable (bool controllerIsAvailable)
 {
-//    midiKeyboard.setVisible (! controllerIsAvailable);
+ 
 }
 
 void RingModulatorAudioProcessorEditor::updateTrackProperties ()
@@ -263,70 +259,14 @@ void RingModulatorAudioProcessorEditor::updateTrackProperties ()
 }
 
 //==============================================================================
-// quick-and-dirty function to format a timecode string
+
 void RingModulatorAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 {
     auto index = box->getSelectedItemIndex();
-//    std::cout << "index @ editor = " << index << std::endl;
     
     if (box == &stereoBox)
     {
         processor.stereoParam->operator= (index);
     }
 }
-
-
-static String timeToTimecodeString (double seconds)
-{
-    const int millisecs = roundToInt (seconds * 1000.0);
-    const int absMillisecs = std::abs (millisecs);
-
-    return String::formatted ("%02d:%02d:%02d.%03d",
-                              millisecs / 3600000,
-                              (absMillisecs / 60000) % 60,
-                              (absMillisecs / 1000) % 60,
-                              absMillisecs % 1000);
-}
-
-// quick-and-dirty function to format a bars/beats string
-static String quarterNotePositionToBarsBeatsString (double quarterNotes, int numerator, int denominator)
-{
-    if (numerator == 0 || denominator == 0)
-        return "1|1|000";
-
-    const int quarterNotesPerBar = (numerator * 4 / denominator);
-    const double beats  = (fmod (quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * numerator;
-
-    const int bar    = ((int) quarterNotes) / quarterNotesPerBar + 1;
-    const int beat   = ((int) beats) + 1;
-    const int ticks  = ((int) (fmod (beats, 1.0) * 960.0 + 0.5));
-
-    return String::formatted ("%d|%d|%03d", bar, beat, ticks);
-}
-
-// Updates the text in our position label.
-void RingModulatorAudioProcessorEditor::updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
-{
-    MemoryOutputStream displayText;
-    displayText << "[" << SystemStats::getJUCEVersion() << "]   "
-    << String (pos.bpm, 2) << " bpm, "
-    << pos.timeSigNumerator << '/' << pos.timeSigDenominator
-    << "  -  " << timeToTimecodeString (pos.timeInSeconds)
-    << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
-                                                        pos.timeSigNumerator,
-                                                        pos.timeSigDenominator);
-    
-    if (pos.isRecording)
-        displayText << "  (recording)";
-    else if (pos.isPlaying)
-        displayText << "  (playing)";
-
-    timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
-}
-
-void RingModulatorAudioProcessorEditor::setBPM(AudioPlayHead::CurrentPositionInfo bpm)
-{
-    beats = bpm.bpm;
-}
-
 

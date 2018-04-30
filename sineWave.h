@@ -5,7 +5,7 @@
 class SineWave : public Oscillator
 {
 public:
-    
+
     //constructors and destructor
     SineWave(double samplerate): SineWave(samplerate, 0, 0) {};
     SineWave(double samplerate, double frequency) :
@@ -15,12 +15,12 @@ public:
     ~SineWave(){};
     //prevent the default constructor to be generated
     SineWave() = delete;
-    
+
     //override calculate
     //this method contains the sample calculation
     void calculate() override;
-    
-    
+
+
 };
 
 

@@ -16,8 +16,6 @@
 
 
 //==============================================================================
-/** This is the editor component that our filter will display.
- */
 class RingModulatorAudioProcessorEditor  : public AudioProcessorEditor,
 private Timer, private ComboBox::Listener
 {
@@ -34,7 +32,6 @@ public:
     
 private:
     void comboBoxChanged (ComboBox*) override;
-    void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo);
     void setBPM(AudioPlayHead::CurrentPositionInfo);
     class ParameterSlider;
     

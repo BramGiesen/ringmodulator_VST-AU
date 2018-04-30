@@ -6,7 +6,7 @@
 class SawWave : public Oscillator
 {
 public:
-    
+
     //constructors and destructor
     SawWave(double samplerate): SawWave(samplerate, 0, 0) {};
     SawWave(double samplerate, double frequency) :
@@ -16,12 +16,12 @@ public:
     ~SawWave(){};
     //prevent the default constructor to be generated
     SawWave() = delete;
-    
+
     //override calculate
     //this method contains the sample calculation
     void calculate() override;
-    
-    
+
+
 };
 
 

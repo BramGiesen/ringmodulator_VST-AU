@@ -13,6 +13,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "sineWave.h"
 #include "sawWave.h"
+#include "invertedSawWave.h"
+#include "squareWave.h"
 #include "randomGen.h"
 #include "onepole.h"
 
@@ -35,13 +37,13 @@ public:
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
-        process (buffer, midiMessages, delayBufferFloat);
+        process (buffer, midiMessages);
     }
     
     void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
-        process (buffer, midiMessages, delayBufferDouble);
+        process (buffer, midiMessages);
     }
     
     //==============================================================================
@@ -97,29 +99,28 @@ public:
 private:
     //==============================================================================
     template <typename FloatType>
-    void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioBuffer<FloatType>& delayBuffer);
-
+    void process (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages);
     
-    AudioBuffer<float> delayBufferFloat;
-    AudioBuffer<double> delayBufferDouble;
-    
+    double sampleRate = 0;
     double phase = 0;
     double sineWave = 0;
     double LFO = 0;
     float amplitudeWet = 0;
     float amplitudeDry = 0;
-    int delayPosition = 0;
     int previousI = 1;
     float glide = 0;
-    float syncfreq;
-    int LFOI;
-    float LFOf;
+    float syncfreq = 0;
     float beats = 120;
-    float currentLFOfreq = 0;
-    float previousLFOfreq = 0;
-    int x = 0;
-    float LFOP = 0;
+    double startLoop = 0;
     
+    int LFOI = 0;
+    float LFOf = 0;
+    float previousLFOfreq = 0;
+    float LFOP = 0;
+    float lowpassParam = 0;
+    
+    bool startTimeSet = false;
+    bool initWaveform = false;
     bool setPhase = false;
     bool setPhaseSwitch = false;
     
@@ -127,10 +128,8 @@ private:
     float rateValues[11]{15,20,30,40,60,80,120,160.0000000001,240,320.0000000002,480};
 
     OnePole *lowPass = new OnePole(1.0 / 44100);
-    // #TODO: make sampleRate variable
     Oscillator **oscillators;
     
-    float lowpassParam = 0;
     
     void setBPM(AudioPlayHead::CurrentPositionInfo bpm);
     void setOSCphase(AudioPlayHead::CurrentPositionInfo bpm);

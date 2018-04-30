@@ -24,7 +24,7 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
     addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO_Frequency",  "LFO_Frequency", -10.0f, 10.0f,0.0f));
     addParameter (LFOdepthParam = new AudioParameterFloat ("LFO_depth", "LFO_depth", 0.0f, 100.0f, 0.5f));
-    addParameter (stereoParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "saw wave", "noise generator" }, 1));
+    addParameter (stereoParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "rising saw", "falling saw", "sine", "square", "noise generator" }, 4));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry_Wet", "Dry_Wet", 0.0f, 1.0f, 0.5f));
 }
 
@@ -65,9 +65,11 @@ AudioProcessor::BusesProperties RingModulatorAudioProcessor::getBusesProperties(
 //==============================================================================
 void RingModulatorAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
 {
+    sampleRate = newSampleRate;
+    
     oscillators = new Oscillator*[2];
-    oscillators[0] = new SineWave(44100, 0, phase);
-    oscillators[1] = new RandomGenerator(44100, 0, phase);
+    oscillators[0] = new SineWave(sampleRate, 0, phase);
+    oscillators[1] = new RandomGenerator(sampleRate, 0, phase);
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
@@ -88,8 +90,7 @@ void RingModulatorAudioProcessor::reset()
 
 template <typename FloatType>
 void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
-                                            MidiBuffer& midiMessages,
-                                            AudioBuffer<FloatType>& delayBuffer)
+                                            MidiBuffer& midiMessages)
 {
     const int numSamples = buffer.getNumSamples();
     const int totalNumInputChannels  = getTotalNumInputChannels();
@@ -112,12 +113,12 @@ void RingModulatorAudioProcessor::process (AudioBuffer<FloatType>& buffer,
             auto channelData = buffer.getWritePointer (channel);
             float  signal = buffer.getSample(channel, sample);
             
-//            LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam);
             sineWave = oscillators[0]->getSample();
             oscillators[0]->tick();
             oscillators[1]->tick();
             
             if(*frequencyParam <= 0)sineWave = 1;
+            
             channelData[sample] = (amplitudeWet * signal * sineWave) + (amplitudeDry * signal);
         }
     
@@ -160,7 +161,7 @@ void RingModulatorAudioProcessor::setFrequency()
 {
     glide = *inputVolumeParam * -1 + 10.1;
     (glide < 10) ? LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam) : LFO = oscillators[1]->getSample()* *LFOdepthParam;
-    lowPass->setFc(glide/44100);
+    lowPass->setFc(glide/sampleRate);
     
     oscillators[0]->setFrequency(*frequencyParam + LFO);
 
@@ -176,8 +177,6 @@ void RingModulatorAudioProcessor::setFrequency()
                 if(!setPhaseSwitch){
                     setPhaseSwitch = true;
                     setOSCphase(lastPosInfo);
-//                    x++;
-//                    std::cout << "phase switch = " << x << std::endl;
                 }
                 else{
 
@@ -199,11 +198,18 @@ void RingModulatorAudioProcessor::setFrequency()
 void RingModulatorAudioProcessor::setWaveForm()
 {
     int i = stereoParam->getIndex() + 1;
-    if(i != previousI){
+    if(i != previousI || !initWaveform){
+        initWaveform = true;
         switch (i) {
-            case 1: { oscillators[1] = new SawWave(44100, 0, phase);
+            case 1: { oscillators[1] = new SawWave(sampleRate, 0, phase);
                 break; }
-            case 2:{ oscillators[1] = new RandomGenerator(44100, 0, phase);   //execution starts at this case label
+            case 2: { oscillators[1] = new invertedSawWave(sampleRate, 0, phase);
+                break; }
+            case 3: { oscillators[1] = new SineWave(sampleRate, 0, phase);
+                break; }
+            case 4: { oscillators[1] = new SquareWave(sampleRate, 0, phase);
+                break; }
+            case 5: { oscillators[1] = new RandomGenerator(sampleRate, 0, phase);   //execution starts at this case label
                 break; }
         }
         previousI = i;
@@ -223,16 +229,27 @@ void RingModulatorAudioProcessor::setBPM(AudioPlayHead::CurrentPositionInfo bpm)
 {
     beats = bpm.bpm;
     
+    if(bpm.isLooping && (bpm.isPlaying || bpm.isRecording)){
+        if(!startTimeSet){
+            startLoop = bpm.timeInSeconds;
+            startTimeSet = true;
+        }
+        if(bpm.timeInSeconds == startLoop)
+            setOSCphase(bpm);
+    }
+    
     if (bpm.isPlaying){
         if(!setPhase){
             setPhase = true;
             setOSCphase(bpm);
-            //            *LFOdepthParam = timer;
         }
     }
     else if (!bpm.isPlaying && !bpm.isRecording){
         setPhase = false;
+        startTimeSet = false;
     }
+    
+    
 }
 
 void RingModulatorAudioProcessor::setOSCphase(AudioPlayHead::CurrentPositionInfo bpm)
