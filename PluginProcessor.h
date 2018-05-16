@@ -86,12 +86,12 @@ public:
     int lastUIWidth = 400, lastUIHeight = 200;
     
     // Our parameters
-    AudioParameterFloat* inputVolumeParam;
+    AudioParameterFloat* glideParam;
     AudioParameterFloat* frequencyParam = nullptr;
     AudioParameterFloat* amplitudeParam = nullptr;
     AudioParameterFloat* LFOfrequencyParam = nullptr;
     AudioParameterFloat* LFOdepthParam = nullptr;
-    AudioParameterChoice* stereoParam;
+    AudioParameterChoice* waveFormParam;
     
     // Current track colour and name
     TrackProperties trackProperties;

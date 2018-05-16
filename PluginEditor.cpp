@@ -54,28 +54,28 @@ public:
 RingModulatorAudioProcessorEditor::RingModulatorAudioProcessorEditor (RingModulatorAudioProcessor& owner)
 : AudioProcessorEditor (owner), processor (owner),
 timecodeDisplayLabel (String()),
-inputVolumeLabel(String(), "LFO GLIDE :"),
+LFOglideLabel(String(), "LFO GLIDE :"),
 frequencyLabel (String(), "FREQUENCY :"),
 amplitudeLabel (String(), "DRY/WET :"),
 LFOfrequencyLabel (String(), "LFO FREQUENCY :"),
 LFOdepthLabel (String(), "LFO DEPTH :"),
-stereoLabel (String(), "LFO WAVEFORM :")
+waveFormLabel (String(), "LFO WAVEFORM :")
 {
     // add some sliders..
     
     
-    addAndMakeVisible (stereoBox);
+    addAndMakeVisible (waveFormBox);
     
     auto i = 1;
-    for (auto choice : processor.stereoParam->choices)
-        stereoBox.addItem (choice, i++);
+    for (auto choice : processor.waveFormParam->choices)
+        waveFormBox.addItem (choice, i++);
     
-    stereoBox.addListener (this);
-    stereoBox.setSelectedId (processor.stereoParam->getIndex() + 1);
+    waveFormBox.addListener (this);
+    waveFormBox.setSelectedId (processor.waveFormParam->getIndex() + 1);
    
-    addAndMakeVisible (inputVolumeSlider = new ParameterSlider (*owner.inputVolumeParam));
-    inputVolumeSlider-> setRange (0.0, 1.0, 0.0);
-    inputVolumeSlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
+    addAndMakeVisible (glideSlider = new ParameterSlider (*owner.glideParam));
+    glideSlider-> setRange (0.0, 1.0, 0.0);
+    glideSlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     
     addAndMakeVisible (frequencySlider = new ParameterSlider (*owner.frequencyParam));
     frequencySlider->setSliderStyle (Slider::Rotary);
@@ -92,19 +92,19 @@ stereoLabel (String(), "LFO WAVEFORM :")
     LFOdepthSlider-> setRange (0.0, 1.0, 0.0);
     LFOdepthSlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     
-    addAndMakeVisible (delaySlider = new ParameterSlider (*owner.amplitudeParam));
-    delaySlider->setSliderStyle (Slider::Rotary);
-    delaySlider-> setRange (0.0, 1.0, 0.0);
-    delaySlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
+    addAndMakeVisible (amplitudeSlider = new ParameterSlider (*owner.amplitudeParam));
+    amplitudeSlider->setSliderStyle (Slider::Rotary);
+    amplitudeSlider-> setRange (0.0, 1.0, 0.0);
+    amplitudeSlider->setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
 
     
-    addAndMakeVisible (inputVolumeLabel);
-    inputVolumeLabel.setJustificationType (Justification::centredLeft);
-    inputVolumeLabel.attachToComponent (inputVolumeSlider, true);
+    addAndMakeVisible (LFOglideLabel);
+    LFOglideLabel.setJustificationType (Justification::centredLeft);
+    LFOglideLabel.attachToComponent (glideSlider, true);
     
-    addAndMakeVisible (stereoLabel);
-    stereoLabel.setJustificationType (Justification::centredLeft);
-    stereoLabel.attachToComponent (&stereoBox, true);
+    addAndMakeVisible (waveFormLabel);
+    waveFormLabel.setJustificationType (Justification::centredLeft);
+    waveFormLabel.attachToComponent (&waveFormBox, true);
     
     frequencyLabel.attachToComponent (frequencySlider, false);
     frequencyLabel.setFont (Font (11.0f));
@@ -115,7 +115,7 @@ stereoLabel (String(), "LFO WAVEFORM :")
     LFOdepthLabel.attachToComponent (LFOdepthSlider, false);
     LFOdepthLabel.setFont (Font (11.0f));
 
-    amplitudeLabel.attachToComponent (delaySlider, false);
+    amplitudeLabel.attachToComponent (amplitudeSlider, false);
     amplitudeLabel.setFont (Font (11.0f));
     
 //     add a label that will display the current timecode and status..
@@ -214,8 +214,8 @@ void RingModulatorAudioProcessorEditor::resized()
     
     auto topSection = r.removeFromTop(30);
 
-    stereoBox.setBounds(100,15,200,20);
-    inputVolumeSlider->setBounds(450, 0, 200, 50);
+    waveFormBox.setBounds(100,15,200,20);
+    glideSlider->setBounds(450, 0, 200, 50);
 
     
   
@@ -225,12 +225,12 @@ void RingModulatorAudioProcessorEditor::resized()
         frequencySlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
         LFOfrequencySlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
         LFOdepthSlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
-        delaySlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth())));
+        amplitudeSlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth())));
 
     
 //
 //    auto bottom = r.removeFromBottom(100);
-//    stereoBox.setBounds(bottom);
+//    waveFormBox.setBounds(bottom);
    
    
     getProcessor().lastUIWidth = getWidth();
@@ -264,9 +264,9 @@ void RingModulatorAudioProcessorEditor::comboBoxChanged (ComboBox* box)
 {
     auto index = box->getSelectedItemIndex();
     
-    if (box == &stereoBox)
+    if (box == &waveFormBox)
     {
-        processor.stereoParam->operator= (index);
+        processor.waveFormParam->operator= (index);
     }
 }
 

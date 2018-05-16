@@ -39,9 +39,9 @@ private:
     
     RingModulatorAudioProcessor& processor;
     
-    Label timecodeDisplayLabel, inputVolumeLabel, frequencyLabel, amplitudeLabel, LFOfrequencyLabel, LFOdepthLabel, stereoLabel;
-    ScopedPointer<ParameterSlider> inputVolumeSlider, frequencySlider, delaySlider, LFOfrequencySlider, LFOdepthSlider;
-    ComboBox stereoBox;
+    Label timecodeDisplayLabel, LFOglideLabel, frequencyLabel, amplitudeLabel, LFOfrequencyLabel, LFOdepthLabel, waveFormLabel;
+    ScopedPointer<ParameterSlider> glideSlider, frequencySlider, amplitudeSlider, LFOfrequencySlider, LFOdepthSlider;
+    ComboBox waveFormBox;
     Colour backgroundColour;
     std::string rateValues[11]{"32","32t","16","16t","8","8t","4","4t","2","2t","1"};
     std::string LFOf;

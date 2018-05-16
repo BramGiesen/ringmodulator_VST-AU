@@ -20,11 +20,11 @@ RingModulatorAudioProcessor::RingModulatorAudioProcessor()
 : AudioProcessor (getBusesProperties())
 {
     lastPosInfo.resetToDefault();
-    addParameter (inputVolumeParam = new AudioParameterFloat ("GLIDE",  "LFO_glide", 0.1f, 10.f, 0.1f));
+    addParameter (glideParam = new AudioParameterFloat ("GLIDE",  "LFO_glide", 0.1f, 10.f, 0.1f));
     addParameter (frequencyParam  = new AudioParameterFloat ("Frequency",  "Frequency", 0.0f, 1200.0f, 0.9f));
     addParameter (LFOfrequencyParam  = new AudioParameterFloat ("LFO_Frequency",  "LFO_Frequency", -10.0f, 10.0f,0.0f));
     addParameter (LFOdepthParam = new AudioParameterFloat ("LFO_depth", "LFO_depth", 0.0f, 100.0f, 0.5f));
-    addParameter (stereoParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "rising saw", "falling saw", "sine", "square", "noise generator" }, 4));
+    addParameter (waveFormParam   = new AudioParameterChoice ("Wave_form", "LFO_wave form", { "rising saw", "falling saw", "sine", "square", "noise generator" }, 4));
     addParameter (amplitudeParam = new AudioParameterFloat ("Dry_Wet", "Dry_Wet", 0.0f, 1.0f, 0.5f));
 }
 
@@ -159,7 +159,7 @@ AudioProcessorEditor* RingModulatorAudioProcessor::createEditor()
 
 void RingModulatorAudioProcessor::setFrequency()
 {
-    glide = *inputVolumeParam * -1 + 10.1;
+    glide = *glideParam * -1 + 10.1;
     (glide < 10) ? LFO = lowPass->process(oscillators[1]->getSample()* *LFOdepthParam) : LFO = oscillators[1]->getSample()* *LFOdepthParam;
     lowPass->setFc(glide/sampleRate);
     
@@ -197,7 +197,7 @@ void RingModulatorAudioProcessor::setFrequency()
 
 void RingModulatorAudioProcessor::setWaveForm()
 {
-    int i = stereoParam->getIndex() + 1;
+    int i = waveFormParam->getIndex() + 1;
     if(i != previousI || !initWaveform){
         initWaveform = true;
         switch (i) {
