@@ -118,10 +118,6 @@ waveFormLabel (String(), "LFO WAVEFORM :")
     amplitudeLabel.attachToComponent (amplitudeSlider, false);
     amplitudeLabel.setFont (Font (11.0f));
     
-//     add a label that will display the current timecode and status..
-//    addAndMakeVisible (timecodeDisplayLabel);
-//    timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
-    
     // set resize limits for this plug-in
     setResizeLimits (700, 200, 700, 200);
     
@@ -217,21 +213,12 @@ void RingModulatorAudioProcessorEditor::resized()
     waveFormBox.setBounds(100,15,200,20);
     glideSlider->setBounds(450, 0, 200, 50);
 
-    
-  
-    
     r.removeFromTop (20);
     auto sliderArea = (r.removeFromTop (35));
         frequencySlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
         LFOfrequencySlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
         LFOdepthSlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth() / 2)));
         amplitudeSlider->setBounds (r.removeFromLeft (jmin (180, r.getWidth())));
-
-    
-//
-//    auto bottom = r.removeFromBottom(100);
-//    waveFormBox.setBounds(bottom);
-   
    
     getProcessor().lastUIWidth = getWidth();
     getProcessor().lastUIHeight = getHeight();

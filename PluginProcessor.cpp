@@ -70,20 +70,17 @@ void RingModulatorAudioProcessor::prepareToPlay (double newSampleRate, int /*sam
     oscillators = new Oscillator*[2];
     oscillators[0] = new SineWave(sampleRate, 0, phase);
     oscillators[1] = new RandomGenerator(sampleRate, 0, phase);
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+ 
 }
 
 void RingModulatorAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+   
 }
 
 void RingModulatorAudioProcessor::reset()
 {
-    // Use this method as the place to clear any delay lines, buffers, etc, as it
-    // means there's been a break in the audio's continuity.
+  
 }
 
 
@@ -262,10 +259,9 @@ void RingModulatorAudioProcessor::setOSCphase(AudioPlayHead::CurrentPositionInfo
 
 
 //==============================================================================
+//store parameters in the memory block.
 void RingModulatorAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // Here's an example of how you can use XML to make it easy and more robust:
     
     // Create an outer XML element..
     XmlElement xml ("RMSETTINGS");
@@ -278,18 +274,16 @@ void RingModulatorAudioProcessor::getStateInformation (MemoryBlock& destData)
     for (auto* param : getParameters()){
         if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param)){
             xml.setAttribute (p->paramID, p->getValue());
-//            std::cout << p << std::endl;
         }
     }
     // then use this helper function to stuff it into the binary blob and return it..
     copyXmlToBinary (xml, destData);
 }
 
+
+// restore the parameters from this memory block
 void RingModulatorAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-    
     // This getXmlFromBinary() helper function retrieves our XML from the binary blob..
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     

@@ -45,7 +45,6 @@ inline void Oscillator::setPhase(double phase)
 
 inline void Oscillator::setFrequency(double frequency)
 {
-    // if(frequency > 0 && frequency < 0.5 * samplerate)
     this->frequency = frequency;
 }
 
